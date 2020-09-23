@@ -19,6 +19,8 @@ class PopularMoviesVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.title = "Popular"
+        
         let width = (view.frame.size.width - 20)
         let height = (view.frame.size.height - 300)
         let layout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
@@ -28,7 +30,7 @@ class PopularMoviesVC: UIViewController {
         
         }
     private func fetch(_ page: Int = 1) {
-        API.fetchPopularMovies(page){ data in
+        API.fetchMovies("popular", page: page){ data in
             self.totalPages = data.totalPages
             self.movies = data.results
             self.collectionView.reloadData()
@@ -38,7 +40,7 @@ class PopularMoviesVC: UIViewController {
         if page < totalPages {
             page += 1
             OperationQueue.main.addOperation {
-                API.fetchPopularMovies(self.page){ data in
+                API.fetchMovies("popular", page: self.page){ data in
                     self.movies? += data.results
                     self.collectionView.reloadData()
                 }
@@ -62,5 +64,10 @@ extension PopularMoviesVC: UICollectionViewDataSource, UICollectionViewDelegate 
             self.loadMoreData()
         }
     }
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "MovieInfo") as! MovieInfoVC
+        self.navigationController?.pushViewController(controller, animated: true)
+   }
 }
