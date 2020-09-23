@@ -4,8 +4,10 @@
 <dict>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<key>NSAllowsArbitraryLoadsUsageDescription</key>
+		<dict/>
 		<key>NSAllowsArbitraryLoads</key>
-		<false/>
+		<true/>
 	</dict>
 	<key>CFBundleSignature</key>
 	<string></string>

@@ -13,25 +13,40 @@ private let identifier = "MovieCell"
 class PopularMoviesVC: UIViewController {
 
     private var movies: [Movie]?
+    private var page: Int = 1
+    private var totalPages: Int = 0
     @IBOutlet weak var collectionView: UICollectionView!
     override func viewDidLoad() {
         super.viewDidLoad()
         
         let width = (view.frame.size.width - 20)
+        let height = (view.frame.size.height - 300)
         let layout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
-        layout.itemSize = CGSize(width: width, height: 450)
+        layout.itemSize = CGSize(width: width, height: height)
+    
         fetch()
         
         }
-    private func fetch() {
-            API.fetchPopularMovies { data in
+    private func fetch(_ page: Int = 1) {
+        API.fetchPopularMovies(page){ data in
+            self.totalPages = data.totalPages
             self.movies = data.results
             self.collectionView.reloadData()
         }
     }
-
+    private func loadMoreData() {
+        if page < totalPages {
+            page += 1
+            OperationQueue.main.addOperation {
+                API.fetchPopularMovies(self.page){ data in
+                    self.movies? += data.results
+                    self.collectionView.reloadData()
+                }
+            }
+        }
     }
-    extension PopularMoviesVC: UICollectionViewDataSource{
+    }
+extension PopularMoviesVC: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return movies?.count ?? 0
     }
@@ -41,6 +56,11 @@ class PopularMoviesVC: UIViewController {
         cell.movie = movies?[indexPath.row]
         return cell
     }
-    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell : UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let count = movies?.count else{fatalError()}
+        if indexPath.item == count - 1{
+            self.loadMoreData()
+        }
+    }
     
 }
